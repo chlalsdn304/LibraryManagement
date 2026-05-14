@@ -1,25 +1,21 @@
-# docker build -t library-management-v1_2 .
-
-# 1단계: 빌드 스테이지
-FROM bellsoft/liberica-openjdk-debian:23 AS build
+# === 1단계: Maven 빌드 ===
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# 모든 파일 복사 (lib 폴더 포함)
-COPY . .
+# pom.xml 먼저 복사 → 의존성 레이어 캐싱
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-# bin 폴더 생성 및 컴파일
-# -cp 옵션으로 lib 폴더 내의 모든 jar 파일을 클래스패스에 추가합니다.
-RUN mkdir -p bin
-RUN javac -d bin -encoding UTF-8 -cp "lib/*:." src/*.java
+# 소스 복사 후 패키징 (shade plugin이 fat jar 생성)
+COPY src ./src
+COPY resources ./resources
+RUN mvn package -DskipTests -B
 
-# 2단계: 실행 스테이지
-FROM bellsoft/liberica-openjdk-debian:23
+# === 2단계: 실행 ===
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# 빌드 결과물 및 라이브러리 복사
-COPY --from=build /app/bin ./bin
-COPY --from=build /app/lib ./lib
+# finalName = library-management-${project.version} → 와일드카드로 버전 변경에도 대응
+COPY --from=build /app/target/library-management-*.jar app.jar
 
-# 실행 시 클래스패스(-cp)를 지정하여 메인 클래스 실행
-# bin 폴더와 lib 안의 모든 jar 파일을 포함해야 합니다.
-ENTRYPOINT ["java", "-cp", "bin:lib/*", "LibraryMain"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
