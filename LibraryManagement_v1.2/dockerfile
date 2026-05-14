@@ -8,7 +8,6 @@ RUN mvn dependency:go-offline -B
 
 # 소스 복사 후 패키징 (shade plugin이 fat jar 생성)
 COPY src ./src
-COPY resources ./resources
 RUN mvn package -DskipTests -B
 
 # === 2단계: 실행 ===
