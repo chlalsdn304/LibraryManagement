@@ -49,7 +49,7 @@ public class LibraryMain {
      * @see LibraryManager#login(String, String)
      */
     private static boolean performLogin() {
-   //     while (true) {
+        while (true) {
             System.out.println("\n========= CSV 로그인 시스템 =========");
             System.out.print("아이디: ");
             String id = sc.nextLine();
