@@ -7,7 +7,7 @@ import java.util.*;
  *<p>2026.05.19 시작
  * @author Su Man Nam
  * @version 1.2
- * 깃허브 액션 추가 
+ * 깃허브 액션 추가
  */
 
 public class LibraryMain {
@@ -49,7 +49,7 @@ public class LibraryMain {
      * @see LibraryManager#login(String, String)
      */
     private static boolean performLogin() {
-        while (true) {
+   //     while (true) {
             System.out.println("\n========= CSV 로그인 시스템 =========");
             System.out.print("아이디: ");
             String id = sc.nextLine();
