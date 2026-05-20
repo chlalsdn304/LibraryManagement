@@ -154,7 +154,8 @@ public class LibraryMain {
     /**
      * 도서 정보의 수정 및 삭제를 처리하는 UI입니다.
      * <p>ID를 통해 도서를 조회하고, 선택에 따라 제목/저자 수정 또는 삭제를 수행합니다.</p>
-     *
+     * <p>수정과 삭제 효율화를 위한 같은 기능으로 개발(05/20; 민우)</p>
+     * @see <a href= "https://github.com/chlalsdn304/LibraryManagement/issues/1"> Issues #1: 책 삭제시 DB에서 삭제가 안됨 </a>
      * @see LibraryManager#deleteBook(int)
      */
     private static void editOrDeleteUI() {
@@ -191,26 +192,28 @@ public class LibraryMain {
                 if (!newTitle.isEmpty()) {
                     book.setTitle(newTitle);
                     System.out.println("[결과] 제목이 수정되었습니다.");
+
                 }
+                manager.saveChanges();
             }
             case 2 -> {
+
                 System.out.print("- 새 저자 입력: ");
                 String newAuthor = sc.nextLine().trim();
                 if (!newAuthor.isEmpty()) {
                     book.setAuthor(newAuthor);
                     System.out.println("[결과] 저자명이 수정되었습니다.");
                 }
+                manager.saveChanges();
             }
             case 3 -> {
+                //삭제 쿼리 작성
                 manager.deleteBook(id);
                 System.out.println("[결과] 삭제되었습니다.");
 
 
             }
         }
-
-        // DB 저장
-        manager.saveChanges();
     }
 
     /**
