@@ -173,9 +173,25 @@ public class LibraryManager {
         return bookMap;
     }
 
+    private static final java.util.regex.Pattern HOST_PATTERN =
+            java.util.regex.Pattern.compile("^[A-Za-z0-9.\\-]{1,253}$");
+
+    /**
+     * 입력값이 IP 주소 또는 호스트네임 형식인지 확인합니다.
+     * @param host 검사할 입력값
+     * @return 형식이 올바르면 true
+     */
+    static boolean isValidHost(String host) {
+        return host != null && HOST_PATTERN.matcher(host).matches();
+    }
+
     public void checkServerStatus(String ip) {
+        if (!isValidHost(ip)) {
+            System.out.println("[오류] 유효하지 않은 IP/호스트 형식입니다: " + ip);
+            return;
+        }
+
         try {
-            // [수정] cmd.exe /c 를 앞에 붙여서 쉘이 명령어를 해석하게 만듭니다.
             String command = "cmd.exe /c ping -n 1 " + ip;
 
             System.out.println("[시스템 실행 명령어]: " + command);

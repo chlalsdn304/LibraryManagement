@@ -172,56 +172,34 @@ class LibraryManagerTest {
     }
 
     /**
-     * 운영체제 명령어 주입(OS Command Injection) 취약점의 존재 여부를 검증하는 테스트입니다.
-     * * <p><b>테스트 목적:</b></p>
-     * <ul>
-     * <li>사용자 입력값이 OS 명령어의 인자로 전달될 때, 적절한 필터링이 부재할 경우 발생하는 위험성을 확인합니다.</li>
-     * <li>명령어 구분자(&&, ;, |)를 통해 원래 의도하지 않은 추가 명령어가 실행될 수 있음을 증명합니다.</li>
-     * </ul>
+     * OS Command Injection이 차단되는지 검증하는 보안 테스트입니다.
+     * <p>정상 IP 뒤에 명령어 구분자({@code &&})와 파일 생성 명령을 결합한 페이로드를 전달했을 때,
+     * 입력 검증에 의해 명령이 실행되지 않아 {@code vuln.txt} 파일이 생성되지 않아야 합니다.</p>
      *
-     * <p><b>공격 시나리오:</b></p>
-     * <ol>
-     * <li>정상적인 IP 주소 뒤에 윈도우 명령어 구분자 {@code &&}와 파일 생성 명령어 {@code echo hacked > vuln.txt}를 결합합니다.</li>
-     * <li>취약한 {@link LibraryManager#checkServerStatus(String)} 메소드에 해당 페이로드를 전달합니다.</li>
-     * <li>명령어 주입이 성공하면, 서버의 현재 작업 디렉토리에 {@code vuln.txt} 파일이 생성됩니다.</li>
-     * </ol>
-     *
-     * <p><b>보안 판정 기준:</b></p>
-     * <ul>
-     * <li>{@code assertTrue(isVulnerable)}: 테스트가 통과(Pass)하면 시스템에 <b>치명적인 보안 취약점</b>이 존재함을 의미합니다.</li>
-     * <li>파일 생성에 성공했다면, 이는 공격자가 서버에서 임의의 코드를 실행하거나 데이터를 파괴할 수 있는 상태임을 입증합니다.</li>
-     * </ul>
-     *
-     * @author Suman Nam
      * @see LibraryManager#checkServerStatus(String)
      * @see <a href="https://cwe.mitre.org/data/definitions/78.html">CWE-78: OS Command Injection</a>
-     *
-     * @see <a href="https://github.com/sumannam/Java/issues/43">Issue #43: OS Command Injection 취약점 개발</a>
      */
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    @DisplayName("보안 테스트: OS Command Injection을 통한 임의 파일 생성")
+    @DisplayName("보안 테스트: OS Command Injection 차단")
     void osCommandInjectionTest() {
         // Given: 핑 명령어 뒤에 'vuln.txt' 파일을 만드는 명령어를 삽입 (Windows 기준)
         String fileName = "vuln.txt";
         String payload = "127.0.0.1 && echo hacked > " + fileName;
 
-        // When: 취약한 서버 진단 기능 실행
+        File injectedFile = new File(fileName);
+        if (injectedFile.exists()) injectedFile.delete();
+
+        // When: 서버 진단 기능 실행
         manager.checkServerStatus(payload);
 
-        // Then: 주입된 명령어(echo hacked > vuln.txt)가 실행되어 파일이 생성되었는지 확인
-        File injectedFile = new File(fileName);
+        // Then: 주입 명령어가 실행되지 않아 파일이 생성되지 않아야 함
         boolean isVulnerable = injectedFile.exists();
 
-        // 테스트 완료 후 생성된 파일 삭제 (흔적 제거)
         if (isVulnerable) {
             injectedFile.delete();
         }
 
-        assertTrue(isVulnerable, "취약점 발견: OS 명령어가 주입되어 임의의 파일이 생성되었습니다.");
-
-        if (isVulnerable) {
-            System.out.println("[경고] OS Command Injection 공격 성공: 서버 내에서 임의 명령어가 실행되었습니다.");
-        }
+        assertFalse(isVulnerable, "OS 명령어가 주입되어 임의의 파일이 생성되었습니다.");
     }
 }
