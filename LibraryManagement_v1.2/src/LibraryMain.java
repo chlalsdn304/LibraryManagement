@@ -322,14 +322,8 @@ public class LibraryMain {
 
     /**
      * 서버의 네트워크 상태를 진단하기 위한 인터페이스를 제공합니다.
-     * <p><b>보안 실습 주의 (Security Warning):</b></p>
-     * <ul>
-     * <li>이 메소드는 <b>OS Command Injection</b> 취약점을 시연하기 위해 의도적으로 설계되었습니다.</li>
-     * <li>입력값에 대한 검증 없이 OS 명령어를 실행하므로, 세미콜론(;)이나 앰퍼샌드(&)를 이용한 추가 명령어 주입이 가능합니다.</li>
-     * </ul>
-     * * @see LibraryManager#checkServerStatus(String)
-     *
-     * @see <a href="https://github.com/sumannam/Java/issues/43">Issue #43: OS Command Injection 취약점 개발</a>
+     * <p>입력받은 IP 주소의 형식을 검증한 뒤 ping 진단을 수행합니다.</p>
+     * @see LibraryManager#checkServerStatus(String)
      */
     private static void checkServerUI() {
         System.out.println("\n[서버 네트워크 진단]");
