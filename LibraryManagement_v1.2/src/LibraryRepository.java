@@ -16,7 +16,7 @@ public class LibraryRepository {
      * @throws SQLException 드라이버 로드 실패 또는 연결 정보가 부적절할 경우 발생
      * @see <a href="https://mariadb.com/kb/en/about-mariadb-connector-j/">MariaDB Connector/J Documentation</a>
      */
-    private Connection getConnection() throws SQLException {
+    protected Connection getConnection() throws SQLException {
         try {
             Class.forName("org.mariadb.jdbc.Driver"); //
         } catch (ClassNotFoundException e) {
@@ -135,18 +135,14 @@ public class LibraryRepository {
 
     /**
      * 사용자 로그인을 위한 정보를 조회합니다.
-     * <p><b>보안 실습 주의:</b> 현재 이 메소드는 SQL Injection 공격에 취약하도록 의도적으로 설계되었습니다.</p>
-     * <p>입력값이 쿼리문에 직접 결합되는 방식의 위험성을 교육하기 위한 용도로만 사용하십시오.</p>
+     * <p>입력값은 PreparedStatement 파라미터로 바인딩하여 SQL Injection을 방지합니다.</p>
      * * @param id 사용자 아이디
      *
      * @param pw 사용자 비밀번호
      * @return 인증된 {@link User} 객체 (일치 정보 없을 시 null)
-     * @see <a href="https://github.com/sumannam/Java/issues/40">Issue #40: SQL Injection 취약점 개발</a>
      */
     public User loadUser(String id, String pw) {
-        //String sql = "SELECT * FROM users WHERE user_id = ? AND password = ?";
-        String sql = "SELECT * FROM users WHERE user_id = '" + id + "' AND password = '" + pw + "'";
-        //System.out.println(sql);
+        String sql = "SELECT * FROM users WHERE user_id = ? AND password = ?";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

@@ -142,33 +142,26 @@ class LibraryManagerTest {
     }
 
     /**
-     * SQL Injection 공격을 이용한 인증 우회 가능 여부를 테스트합니다.
+     * SQL Injection 인증 우회가 차단되는지 검증하는 보안 테스트입니다.
      * <p><b>공격 시나리오:</b> 비밀번호를 모르는 상태에서 아이디 입력란에
-     * 항상 참이 되는 조건({@code ' OR 1=1})을 주입하여 로그인을 시도합니다.</p>
-     * * <p><b>예상 결과:</b> 취약한 코드 환경에서는 SQL 문법이 왜곡되어
-     * 실제 비밀번호 일치 여부와 상관없이 로그인이 성공(true)해야 합니다.</p>
+     * 항상 참이 되는 조건({@code ' OR 1=1 #})을 주입하여 로그인을 시도합니다.</p>
+     * <p><b>예상 결과:</b> 파라미터 바인딩으로 입력이 데이터로만 취급되므로 로그인이 실패해야 합니다.</p>
      *
-     * * @see <a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a>
-     *
-     * @see <a href="https://github.com/sumannam/Java/issues/40">Issue #40: SQL Injection 취약점 개발</a>
+     * @see <a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a>
      */
     @Test
-    @Disabled("CI: DB(MariaDB) 접근이 필요한 보안 테스트. 로컬에서 DB 연결 시에만 실행")
-    @DisplayName("보안 테스트: SQL Injection을 이용한 인증 우회")
+    @Disabled("CI: DB(MariaDB) 접근이 필요한 테스트. 로컬에서 DB 연결 시에만 실행")
+    @DisplayName("보안 테스트: SQL Injection 인증 우회 차단")
     void loginSqlInjectionTest() {
         // Given: 패스워드를 모르는 상태에서 항상 참이 되는 조건 주입
         String attackId = "' OR 1=1 #";
         String attackPw = "wrong_password";
 
-        // When: 취약한 login 메서드 호출
+        // When: login 메서드 호출
         boolean result = manager.login(attackId, attackPw);
 
-        // Then: 로그인이 성공(true)한다면 SQL Injection 취약점이 존재함을 입증
-        assertTrue(result, "취약점 발견: SQL Injection 페이로드로 인증이 우회되었습니다.");
-
-        if (result) {
-            System.out.println("[경고] SQL Injection 공격 성공: 유효하지 않은 계정으로 로그인되었습니다.");
-        }
+        // Then: 인증 우회가 차단되어 로그인이 실패해야 함
+        assertFalse(result, "SQL Injection 페이로드로 인증이 우회되었습니다.");
     }
 
     /**
