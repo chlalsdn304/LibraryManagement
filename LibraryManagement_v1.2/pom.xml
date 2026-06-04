@@ -42,6 +42,14 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- 보안 회귀 테스트(SQL Injection 차단 검증)용 인메모리 DB. 실DB 없이 CI에서 실행 가능 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
